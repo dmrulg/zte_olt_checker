@@ -1,7 +1,7 @@
 <?php
 
 const AUTH_KEY = '';
-const API_SERVER = 'http://';
+const API_SERVER = '';
 
 function curlUrl($url, $data = [], $encode_data_to_json = false)
 {
@@ -107,6 +107,7 @@ if ($result && $result['statusCode'] == 200) {
         }
     }
 } else {
+    print_r($result);
     throw new \Exception('/api/v1/device response not a 200 code');
 }
-echo 'Total execution time: ' . (microtime(true) - $time_start);
+echo 'Total execution time: ' . (microtime(true) - $time_start)."\r\n";
