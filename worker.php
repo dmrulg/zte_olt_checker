@@ -27,10 +27,10 @@ function curlUrl($url, $data = [], $encode_data_to_json = false)
 function ping($host)
 {
     if (exec('echo EXEC') == 'EXEC') {
-        exec(sprintf('ping -c 1 -W 1 %s', escapeshellarg($host)), $res, $rval);
+        exec(sprintf('ping -c 3 -W 2 %s', escapeshellarg($host)), $res, $rval);
     } elseif (function_exists('fsocketopen')) {
         $port = 80;
-        $timeout = 1;
+        $timeout = 2;
         $fsock = fsockopen($host, $port, $errno, $errstr, $timeout);
         if (!$fsock) {
             $rval = 0;
@@ -54,15 +54,18 @@ if ($result && $result['statusCode'] == 200) {
     $data_to_reboot = [];
     foreach ($devices_to_check as $item) {
         foreach ($item['params']['diag_ips'] as $key => $value) {
+            $temp_not_ping = [];
             foreach ($value as $ip) {
                 if (!ping($ip)) {
-                    $data_to_reboot[$key]['item'] = $item;
-                    $data_to_reboot[$key]['not_ping'][] = $ip;
+                    $temp_not_ping[] = $ip;
                 }
+            }
+            if (count($value) == count($temp_not_ping)) {
+                $data_to_reboot[$key]['item'] = $item;
+                $data_to_reboot[$key]['not_ping'] = $temp_not_ping;
             }
         }
     }
-
     foreach ($data_to_reboot as $key => $value) {
         $device_id_in_wildcore = $value['item']['id'];
         $data = [
@@ -71,7 +74,7 @@ if ($result && $result['statusCode'] == 200) {
         $reset_port_res = curlUrl(API_SERVER . '/api/v1/switcher-core/device/ctrl_reset_port/' . $device_id_in_wildcore, $data);
         if ($reset_port_res && $reset_port_res['statusCode'] == 200) {
             $data = [
-                'action' => 'auto:port_resseted',
+                'action' => 'auto:port_reseted',
                 'device' => ['id' => $device_id_in_wildcore],
                 'user' => ['id' => 1],
                 'status' => 'SUCCESS',
