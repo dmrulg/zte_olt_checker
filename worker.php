@@ -1,7 +1,7 @@
 <?php
 
 const AUTH_KEY = '';
-const API_SERVER = 'http://127.0.0.1:8080';
+const API_SERVER = 'http://';
 
 function curlUrl($url, $data = [], $encode_data_to_json = false)
 {
@@ -38,9 +38,15 @@ function ping($host)
             $rval = 1;
         }
     }
+    $status = 'ping ok';
+    if($rval){
+        $status = 'not ping';
+    }
+    echo $host.' -> ' .$status. "\r\n";
     return $rval === 0;
 }
 
+$time_start = microtime(true);
 $result = curlUrl(API_SERVER . '/api/v1/device');
 if ($result && $result['statusCode'] == 200) {
     $devices_to_check = [];
@@ -51,9 +57,13 @@ if ($result && $result['statusCode'] == 200) {
             }
         }
     }
+    if(empty($devices_to_check)){
+        echo "no diag_ips to check\r\n";
+    }
     $data_to_reboot = [];
     foreach ($devices_to_check as $item) {
         foreach ($item['params']['diag_ips'] as $key => $value) {
+            echo $item['ip'].' -> '.$item['model']['key']. ' -> '. $key." checking\r\n";
             $temp_not_ping = [];
             foreach ($value as $ip) {
                 if (!ping($ip)) {
@@ -66,19 +76,26 @@ if ($result && $result['statusCode'] == 200) {
             }
         }
     }
+
+    if(empty($data_to_reboot)){
+        echo "nothing to reboot\r\n";
+    }
+
     foreach ($data_to_reboot as $key => $value) {
+        echo "{$value['item']['ip']} {$value['item']['model']['key']} {$key} going to reset\r\n";
         $device_id_in_wildcore = $value['item']['id'];
         $data = [
             'interface' => $key
         ];
         $reset_port_res = curlUrl(API_SERVER . '/api/v1/switcher-core/device/ctrl_reset_port/' . $device_id_in_wildcore, $data);
+        print_r($reset_port_res);
         if ($reset_port_res && $reset_port_res['statusCode'] == 200) {
             $data = [
                 'action' => 'auto:port_reseted',
                 'device' => ['id' => $device_id_in_wildcore],
                 'user' => ['id' => 1],
                 'status' => 'SUCCESS',
-                'message' => "Port {$key} successfully reseted",
+                'message' => "{$value['item']['ip']} {$value['item']['model']['key']} {$key} successfully reseted",
                 'meta' => [
                     'interface' => [
                         'id' => 1,
@@ -92,3 +109,4 @@ if ($result && $result['statusCode'] == 200) {
 } else {
     throw new \Exception('/api/v1/device response not a 200 code');
 }
+echo 'Total execution time: ' . (microtime(true) - $time_start);
