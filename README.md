@@ -2,7 +2,7 @@
 
 First generate key
 ```
-./bin/wca.sh user:generate-key admin 365d
+wca user:generate-key admin 365d
 ```
 
 and copy key to file worker. Edit server ip if need.
