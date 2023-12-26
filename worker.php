@@ -39,10 +39,10 @@ function ping($host)
         }
     }
     $status = 'ping ok';
-    if($rval){
+    if ($rval) {
         $status = 'not ping';
     }
-    echo $host.' -> ' .$status. "\r\n";
+    echo $host . ' -> ' . $status . "\r\n";
     return $rval === 0;
 }
 
@@ -57,13 +57,13 @@ if ($result && $result['statusCode'] == 200) {
             }
         }
     }
-    if(empty($devices_to_check)){
+    if (empty($devices_to_check)) {
         echo "no diag_ips to check\r\n";
     }
     $data_to_reboot = [];
     foreach ($devices_to_check as $item) {
         foreach ($item['params']['diag_ips'] as $key => $value) {
-            echo $item['ip'].' -> '.$item['model']['key']. ' -> '. $key." checking\r\n";
+            echo $item['ip'] . ' -> ' . $item['model']['key'] . ' -> ' . $key . " checking\r\n";
             $temp_not_ping = [];
             foreach ($value as $ip) {
                 if (!ping($ip)) {
@@ -77,7 +77,7 @@ if ($result && $result['statusCode'] == 200) {
         }
     }
 
-    if(empty($data_to_reboot)){
+    if (empty($data_to_reboot)) {
         echo "nothing to reboot\r\n";
     }
 
