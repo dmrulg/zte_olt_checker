@@ -42,7 +42,7 @@ function ping($host)
     if ($rval) {
         $status = 'not ping';
     }
-    echo $host . ' -> ' . $status . "\r\n";
+    echo date('Y-m-d H:i:s') . ' ' . $host . ' -> ' . $status . "\r\n";
     return $rval === 0;
 }
 
@@ -58,12 +58,12 @@ if ($result && $result['statusCode'] == 200) {
         }
     }
     if (empty($devices_to_check)) {
-        echo "no diag_ips to check\r\n";
+        echo date('Y-m-d H:i:s') . " no diag_ips to check\r\n";
     }
     $data_to_reboot = [];
     foreach ($devices_to_check as $item) {
         foreach ($item['params']['diag_ips'] as $key => $value) {
-            echo $item['ip'] . ' -> ' . $item['model']['key'] . ' -> ' . $key . " checking\r\n";
+            echo date('Y-m-d H:i:s') . ' ' . $item['ip'] . ' -> ' . $item['model']['key'] . ' -> ' . $key . " checking\r\n";
             $temp_not_ping = [];
             foreach ($value as $ip) {
                 if (!ping($ip)) {
@@ -78,11 +78,11 @@ if ($result && $result['statusCode'] == 200) {
     }
 
     if (empty($data_to_reboot)) {
-        echo "nothing to reboot\r\n";
+        echo date('Y-m-d H:i:s') . " nothing to reboot\r\n";
     }
 
     foreach ($data_to_reboot as $key => $value) {
-        echo "{$value['item']['ip']} {$value['item']['model']['key']} {$key} going to reset\r\n";
+        echo date('Y-m-d H:i:s') . " {$value['item']['ip']} {$value['item']['model']['key']} {$key} going to reset\r\n";
         $device_id_in_wildcore = $value['item']['id'];
         $data = [
             'interface' => $key
@@ -110,4 +110,4 @@ if ($result && $result['statusCode'] == 200) {
     print_r($result);
     throw new \Exception('/api/v1/device response not a 200 code');
 }
-echo 'Total execution time: ' . (microtime(true) - $time_start)."\r\n";
+echo date('Y-m-d H:i:s') . ' Total execution time: ' . (microtime(true) - $time_start) . "\r\n";
