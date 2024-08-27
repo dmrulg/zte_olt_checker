@@ -47,7 +47,7 @@ function ping($host)
 }
 
 $time_start = microtime(true);
-$result = curlUrl(API_SERVER . '/api/v1/device');
+$result = curlUrl(API_SERVER . '/api/v1/device?limit=10000');
 if ($result && $result['statusCode'] == 200) {
     $devices_to_check = [];
     foreach ($result['data'] as $item) {
